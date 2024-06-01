@@ -10,9 +10,11 @@ namespace fleet_management_backend.Models.Domains
         [Required]
         public string Password { get; set; }
 
+        [MaxLength(100)]
         public string? Email { get; set; }
 
         [Required]
+        [MaxLength(30)]
         public string MobileNumber { get; set; }
 
         [Required]

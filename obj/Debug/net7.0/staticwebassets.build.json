@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "yNi3sji6attw0pBU20D7cVG5yjiVyTGTOj5aN6bVHPE=",
+  "Source": "fleet-management-backend",
+  "BasePath": "_content/fleet-management-backend",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
