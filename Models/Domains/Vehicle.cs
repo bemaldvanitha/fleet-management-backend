@@ -36,5 +36,11 @@ namespace fleet_management_backend.Models.Domains
         public VehicleStatus VehicleStatus { get; set; }
 
         public ICollection<VehicleCertification> VehicleCertifications { get; set; }
+
+        public ICollection<Maintenance> Maintenances { get; set; }
+
+        public ICollection<VehicleFuelLevel> VehicleFuelLevels { get; set; }
+
+        public ICollection<Fuel> VehicleFuelRefills { get; set; }
     }
 }
