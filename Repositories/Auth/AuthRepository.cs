@@ -21,6 +21,59 @@ namespace fleet_management_backend.Repositories.Auth
             this._configuration = configuration;
         }
 
+        public async Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest)
+        {
+            try
+            {
+                var isAccountExist = await _context.User.Include(x => x.UserType).FirstOrDefaultAsync(u => u.MobileNumber == 
+                    loginRequest.MobileNumber);
+
+                if (isAccountExist == null)
+                {
+                    return new LoginResponseDTO 
+                    {
+                        Message = "Authentication Error",
+                        StatusCode = 401,
+                        Token = ""
+                    };
+                }
+
+                string hashedPassword = string.Join("", MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(loginRequest.Password))
+                        .Select(x => x.ToString("x2")));
+
+                if(!isAccountExist.Password.Equals(hashedPassword))
+                {
+                    return new LoginResponseDTO
+                    {
+                        Message = "Authentication Error",
+                        StatusCode = 401,
+                        Token = ""
+                    };
+                }
+
+                var token = GenerateJWTToken(isAccountExist);
+
+                return new LoginResponseDTO
+                {
+                    Message = "Login Success",
+                    StatusCode = 200,
+                    Token = token
+                };
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new LoginResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500,
+                    Token = ""
+                };
+            }
+        }
+
         public async Task<SignupResponseDTO> SignUp(SignupRequestDTO signupRequest)
         {
             try
@@ -33,7 +86,7 @@ namespace fleet_management_backend.Repositories.Auth
                     return new SignupResponseDTO
                     {
                         Message = "Email Already Exist",
-                        StatusCode = 404,
+                        StatusCode = 400,
                         Token = ""
                     };
                 }
@@ -43,7 +96,7 @@ namespace fleet_management_backend.Repositories.Auth
                     return new SignupResponseDTO
                     {
                         Message = "Mobile Number Already Exist",
-                        StatusCode = 404,
+                        StatusCode = 400,
                         Token = ""
                     };
                 }
@@ -76,6 +129,7 @@ namespace fleet_management_backend.Repositories.Auth
                 await _context.User.AddAsync(user);
                 await _context.SaveChangesAsync();
 
+                user.UserType = userType;
                 var token = GenerateJWTToken(user);
 
                 return new SignupResponseDTO
@@ -97,11 +151,6 @@ namespace fleet_management_backend.Repositories.Auth
             }
         }
 
-        public Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest)
-        {
-            throw new NotImplementedException();
-        }
-
         private string GenerateJWTToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -110,8 +159,10 @@ namespace fleet_management_backend.Repositories.Auth
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim("mobile", user.MobileNumber ?? string.Empty),
+                new Claim("type", user.UserType.Type ?? string.Empty)
             };
 
             var token = new JwtSecurityToken(

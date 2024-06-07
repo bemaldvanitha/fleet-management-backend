@@ -41,3 +41,8 @@ D:\fleet-management\backend\fleet-management-backend\obj\Debug\net7.0\refint\fle
 D:\fleet-management\backend\fleet-management-backend\obj\Debug\net7.0\fleet-management-backend.pdb
 D:\fleet-management\backend\fleet-management-backend\obj\Debug\net7.0\fleet-management-backend.genruntimeconfig.cache
 D:\fleet-management\backend\fleet-management-backend\obj\Debug\net7.0\ref\fleet-management-backend.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Microsoft.IdentityModel.Abstractions.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Microsoft.IdentityModel.JsonWebTokens.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Microsoft.IdentityModel.Logging.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Microsoft.IdentityModel.Tokens.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\System.IdentityModel.Tokens.Jwt.dll

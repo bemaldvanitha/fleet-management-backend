@@ -1,4 +1,5 @@
 using fleet_management_backend.Data;
+using fleet_management_backend.Repositories.Auth;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<FleetManagerDbContext>(option =>
     option.UseMySql(builder.Configuration.GetConnectionString("FleetManagerConnection"), 
     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("FleetManagerConnection"))));
+
+builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 var app = builder.Build();
 
