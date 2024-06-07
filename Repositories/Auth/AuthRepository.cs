@@ -1,0 +1,127 @@
+﻿using fleet_management_backend.Data;
+using fleet_management_backend.Models.Domains;
+using fleet_management_backend.Models.DTO.Auth;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+
+namespace fleet_management_backend.Repositories.Auth
+{
+    public class AuthRepository : IAuthRepository
+    {
+        private readonly FleetManagerDbContext _context;
+        private readonly IConfiguration _configuration;
+
+        public AuthRepository(FleetManagerDbContext context, IConfiguration configuration)
+        {
+            this._context = context;
+            this._configuration = configuration;
+        }
+
+        public async Task<SignupResponseDTO> SignUp(SignupRequestDTO signupRequest)
+        {
+            try
+            {
+                var isEmailExist = await _context.User.FirstOrDefaultAsync(u => u.Email == signupRequest.Email);
+                var isMobileNumberExist = await _context.User.FirstOrDefaultAsync(u => u.MobileNumber == signupRequest.MobileNumber);
+
+                if (isEmailExist != null && signupRequest.Email != "")
+                {
+                    return new SignupResponseDTO
+                    {
+                        Message = "Email Already Exist",
+                        StatusCode = 404,
+                        Token = ""
+                    };
+                }
+
+                if (isMobileNumberExist != null)
+                {
+                    return new SignupResponseDTO
+                    {
+                        Message = "Mobile Number Already Exist",
+                        StatusCode = 404,
+                        Token = ""
+                    };
+                }
+
+                string hashedPassword = string.Join("", MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(signupRequest.Password))
+                        .Select(x => x.ToString("x2")));
+
+                var userType = await _context.UserType.FirstOrDefaultAsync(x => x.Type == signupRequest.UserType);
+
+                if (userType == null)
+                {
+                    userType = new UserType
+                    {
+                        Type = signupRequest.UserType
+                    };
+
+                    await _context.UserType.AddAsync(userType);
+                    await _context.SaveChangesAsync();
+                }
+
+                var user = new User
+                {
+                    DisplayName = signupRequest.DisplayName,
+                    Email = signupRequest.Email,
+                    MobileNumber = signupRequest.MobileNumber,
+                    Password = hashedPassword,
+                    UserTypeId = userType.Id,
+                };
+
+                await _context.User.AddAsync(user);
+                await _context.SaveChangesAsync();
+
+                var token = GenerateJWTToken(user);
+
+                return new SignupResponseDTO
+                {
+                    Message = "Sign up successfully",
+                    StatusCode = 201,
+                    Token = token
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return new SignupResponseDTO 
+                { 
+                    Message = ex.Message,
+                    StatusCode = 500,
+                    Token = ""
+                };
+            }
+        }
+
+        public Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GenerateJWTToken(User user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddDays(4),
+                signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+    }
+}
