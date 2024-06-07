@@ -1,6 +1,6 @@
 ﻿using fleet_management_backend.Models.DTO.Vehicle;
 
-namespace fleet_management_backend.Repositories.Vehicle
+namespace fleet_management_backend.Repositories.Vehicles
 {
     public interface IVehicleRepository
     {

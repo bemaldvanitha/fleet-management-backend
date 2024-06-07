@@ -16,10 +16,10 @@
 
         public bool IsBrandNew { get; set; }
 
-        public List<VehicleCertification> VehicleCertifications { get; set; }
+        public List<VehicleCertificationItem> VehicleCertifications;
     }
 
-    public class VehicleCertification
+    public class VehicleCertificationItem
     {
         public string CertificationType { get; set; }
 
