@@ -102,5 +102,35 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpPost]
+        [Route("Reset")]
+        [Authorize]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDTO resetPasswordRequest)
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                ResetPasswordResponseDTO resetPasswordResponse = await _authRepository.ResetPassword(Guid.Parse(userId), 
+                    resetPasswordRequest.Password);
+
+                if(resetPasswordResponse.StatusCode == 404)
+                {
+                    return NotFound(resetPasswordResponse);
+                }
+
+                if (resetPasswordResponse.StatusCode == 500) 
+                { 
+                    return BadRequest(resetPasswordResponse); 
+                }
+
+                return Ok(resetPasswordResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

@@ -49,3 +49,6 @@ D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\System.Ide
 D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.dll
 D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\AWSSDK.Core.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\AWSSDK.Extensions.NETCore.Setup.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\AWSSDK.S3.dll

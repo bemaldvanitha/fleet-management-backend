@@ -1,5 +1,6 @@
 using fleet_management_backend.Data;
 using fleet_management_backend.Repositories.Auth;
+using fleet_management_backend.Repositories.File;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -16,11 +17,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+
+builder.Services.AddAWSService<Amazon.S3.IAmazonS3>();
+
 builder.Services.AddDbContext<FleetManagerDbContext>(option =>
     option.UseMySql(builder.Configuration.GetConnectionString("FleetManagerConnection"), 
     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("FleetManagerConnection"))));
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IFileRepository, FileRepository>();
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 

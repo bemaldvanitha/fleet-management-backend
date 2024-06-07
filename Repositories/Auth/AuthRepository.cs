@@ -74,6 +74,45 @@ namespace fleet_management_backend.Repositories.Auth
             }
         }
 
+        public async Task<ResetPasswordResponseDTO> ResetPassword(Guid id, string password)
+        {
+            try
+            {
+                var user = await _context.User.Include(u => u.UserType).FirstOrDefaultAsync(x => x.Id == id);
+
+                if (user == null)
+                {
+                    return new ResetPasswordResponseDTO
+                    {
+                        Message = "User Profile Not Found",
+                        StatusCode = 404
+                    };
+                }
+
+                string hashedPassword = string.Join("", MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(password))
+                       .Select(x => x.ToString("x2")));
+
+                user.Password = hashedPassword;
+                await _context.SaveChangesAsync();
+
+                return new ResetPasswordResponseDTO
+                {
+                    Message = "Password Reseted",
+                    StatusCode = 200
+                };
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine();
+
+                return new ResetPasswordResponseDTO 
+                { 
+                    Message = ex.Message,
+                    StatusCode = 500 
+                };
+            }
+        }
+
         public async Task<SignupResponseDTO> SignUp(SignupRequestDTO signupRequest)
         {
             try
