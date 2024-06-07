@@ -7,5 +7,9 @@ namespace fleet_management_backend.Repositories.Auth
         public Task<SignupResponseDTO> SignUp(SignupRequestDTO signupRequest);
 
         public Task<LoginResponseDTO> Login(LoginRequestDTO loginRequest);
+
+        public Task<UserProfileResponseDTO> UserProfile(Guid id);
+
+        public Task<ResetPasswordResponseDTO> ResetPassword(Guid id, string password);
     }
 }

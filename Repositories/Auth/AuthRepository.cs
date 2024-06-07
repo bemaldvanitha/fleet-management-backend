@@ -151,6 +151,47 @@ namespace fleet_management_backend.Repositories.Auth
             }
         }
 
+        public async Task<UserProfileResponseDTO> UserProfile(Guid id)
+        {
+            try
+            {
+                var user = await _context.User.Include(u => u.UserType).FirstOrDefaultAsync(x => x.Id == id);
+
+                if (user == null)
+                {
+                    return new UserProfileResponseDTO
+                    {
+                        Message = "User Profile Not Found",
+                        StatusCode = 404
+                    };
+                }
+
+                return new UserProfileResponseDTO
+                {
+                    Message = "User Profile Found",
+                    StatusCode = 200,
+                    UserProfile = new UserProfile
+                    {
+                        Id = id,
+                        DisplayName = user.DisplayName,
+                        Email = user.Email ?? String.Empty,
+                        MobileNumber = user.MobileNumber,
+                        UserType = user.UserType.Type
+                    }
+                };
+
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                
+                return new UserProfileResponseDTO 
+                { 
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         private string GenerateJWTToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

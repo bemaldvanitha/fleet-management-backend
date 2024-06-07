@@ -1,7 +1,10 @@
 ﻿using fleet_management_backend.Models.DTO.Auth;
 using fleet_management_backend.Repositories.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace fleet_management_backend.Controllers
 {
@@ -67,6 +70,34 @@ namespace fleet_management_backend.Controllers
                 return Ok(loginResponse);
             }
             catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpGet]
+        [Route("Profile")]
+        [Authorize]
+        public async Task<IActionResult> GetProfile()
+        {
+            try
+            {
+                var userId = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                UserProfileResponseDTO userProfileResponse = await _authRepository.UserProfile(Guid.Parse(userId));
+
+                if(userProfileResponse.StatusCode == 404)
+                {
+                    return NotFound(userProfileResponse);
+                }
+
+                if(userProfileResponse.StatusCode == 500)
+                {
+                    return BadRequest(userProfileResponse);
+                }
+
+                return Ok(userProfileResponse);
+            }catch (Exception ex)
             {
                 return BadRequest("Something went wrong");
             }
