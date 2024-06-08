@@ -55,6 +55,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminPolicy", policy => policy.RequireClaim("type", "Admin"));
     options.AddPolicy("FleetManagerPolicy", policy => policy.RequireClaim("type", "Fleet-Manager"));
     options.AddPolicy("DriverPolicy", policy => policy.RequireClaim("type", "Driver"));
+    options.AddPolicy("AdminOrFleetManagerPolicy", policy => policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "type" && (c.Value == "Admin" || c.Value == "Fleet-Manager"))));
 });
 
 var app = builder.Build();

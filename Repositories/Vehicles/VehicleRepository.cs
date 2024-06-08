@@ -116,5 +116,49 @@ namespace fleet_management_backend.Repositories.Vehicles
                 };
             }
         }
+
+        public async Task<GetAllVehicleResponseDTO> GetAllVehicles()
+        {
+            try
+            {
+                var allVehicles = await _context.Vehicle.Include(x => x.VehicleBrand).Include(x => x.VehicleModel)
+                    .Include(x => x.VehicleStatus).ToListAsync();
+
+                List<VehicleResponseObj> vehicleList = new List<VehicleResponseObj>();
+
+                foreach (var vehicle in allVehicles)
+                {
+                    var vehicleObj = new VehicleResponseObj
+                    {
+                        Id = vehicle.Id,
+                        Brand = vehicle.VehicleBrand.Brand,
+                        Model = vehicle.VehicleModel.Model,
+                        RegistrationNumber = vehicle.RegistrationNumber,
+                        Status = vehicle.VehicleStatus.Status,
+                        VIN = vehicle.VIN
+                    };
+
+                    vehicleList.Add(vehicleObj);
+                }
+
+                return new GetAllVehicleResponseDTO
+                {
+                    Message = "All Vehicles",
+                    StatusCode = 200,
+                    Vehicles = vehicleList
+                };
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new GetAllVehicleResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
     }
 }

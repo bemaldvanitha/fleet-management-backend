@@ -16,7 +16,7 @@
 
         public bool IsBrandNew { get; set; }
 
-        public List<VehicleCertificationItem> VehicleCertifications;
+        public List<VehicleCertificationItem> VehicleCertifications { get; set; }
     }
 
     public class VehicleCertificationItem

@@ -5,5 +5,7 @@ namespace fleet_management_backend.Repositories.Vehicles
     public interface IVehicleRepository
     {
         public Task<AddVehicleResponseDTO> AddVehicle(AddVehicleRequestDTO addVehicleRequest);
+
+        public Task<GetAllVehicleResponseDTO> GetAllVehicles();
     }
 }
