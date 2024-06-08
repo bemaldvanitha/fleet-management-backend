@@ -147,5 +147,32 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpPatch]
+        [Route("{vehicle_id}")]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> UpdateVehicleCertificates([FromRoute] string vehicle_id, [FromBody] UpdateVehicleRequestDTO vehicleRequest)
+        {
+            try
+            {
+                VehicleResponseDTO vehicleResponse = await _vehicleRepository.UpdateVehicleCertificates(
+                    Guid.Parse(vehicle_id), vehicleRequest);
+
+                if(vehicleResponse.StatusCode == 500)
+                {
+                    return BadRequest(vehicleResponse);
+                }
+
+                if(vehicleResponse.StatusCode == 400)
+                {
+                    return NotFound(vehicleResponse);
+                }
+
+                return Ok(vehicleResponse);
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

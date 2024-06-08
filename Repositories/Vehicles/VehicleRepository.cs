@@ -349,5 +349,52 @@ namespace fleet_management_backend.Repositories.Vehicles
                 };
             }
         }
+
+        public async Task<VehicleResponseDTO> UpdateVehicleCertificates(Guid id, UpdateVehicleRequestDTO updateVehicleRequest)
+        {
+            try
+            {
+                var updatingVehicle = await _context.Vehicle.Include(x => x.VehicleCertifications)
+                    .ThenInclude(certification => certification.CertificationType).FirstOrDefaultAsync(x => x.Id == id);
+
+                if (updatingVehicle == null)
+                {
+                    return new VehicleResponseDTO
+                    {
+                        Message = "Vehicle Not Found",
+                        StatusCode = 400
+                    };
+                }
+
+                foreach(var certification in updatingVehicle.VehicleCertifications) 
+                {
+                    var isChanging = updateVehicleRequest.VehicleCertificates.FirstOrDefault(x => x.CertificateType == 
+                        certification.CertificationType.Type);
+
+                    if(isChanging != null)
+                    {
+                        certification.Certification = isChanging.Certificate;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                return new VehicleResponseDTO
+                {
+                    Message = "Data Update Successful",
+                    StatusCode = 200
+                };
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new VehicleResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
     }
 }

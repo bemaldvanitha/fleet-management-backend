@@ -13,5 +13,7 @@ namespace fleet_management_backend.Repositories.Vehicles
         public Task<VehicleResponseDTO> RemoveVehicle(Guid id);
 
         public Task<VehicleResponseDTO> ChangeStatus(Guid id);
+
+        public Task<VehicleResponseDTO> UpdateVehicleCertificates(Guid id, UpdateVehicleRequestDTO updateVehicleRequest);
     }
 }
