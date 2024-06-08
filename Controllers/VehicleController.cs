@@ -93,5 +93,32 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpDelete]
+        [Route("Delete/{vehicle_id}")]
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<IActionResult> RemoveVehicle([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                VehicleResponseDTO vehicleResponse = await _vehicleRepository.RemoveVehicle(Guid.Parse(vehicle_id));
+
+                if (vehicleResponse.StatusCode == 500)
+                {
+                    return BadRequest(vehicleResponse);
+                }
+
+                if (vehicleResponse.StatusCode == 400)
+                {
+                    return NotFound(vehicleResponse);
+                }
+
+                return Ok(vehicleResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

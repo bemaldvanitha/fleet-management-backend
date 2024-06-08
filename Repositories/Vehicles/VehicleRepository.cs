@@ -239,5 +239,45 @@ namespace fleet_management_backend.Repositories.Vehicles
                 };
             }
         }
+
+        public async Task<VehicleResponseDTO> RemoveVehicle(Guid id)
+        {
+            try
+            {
+                var deleteVehicle = await _context.Vehicle.FirstOrDefaultAsync(x => x.Id == id);
+
+                if (deleteVehicle == null)
+                {
+                    return new VehicleResponseDTO
+                    {
+                        Message = "Vehicle Not Found",
+                        StatusCode = 400
+                    };
+                }
+
+                var deletingVehicleCertifications = await _context.VehicleCertifications.Where(x => x.VehicleId == id).ToListAsync();
+
+                _context.VehicleCertifications.RemoveRange(deletingVehicleCertifications);
+                _context.Vehicle.Remove(deleteVehicle);
+                await _context.SaveChangesAsync();
+
+                return new VehicleResponseDTO
+                {
+                    Message = "Vehicle Removed",
+                    StatusCode = 200
+                };
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new VehicleResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
     }
 }

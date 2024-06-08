@@ -9,5 +9,7 @@ namespace fleet_management_backend.Repositories.Vehicles
         public Task<GetAllVehicleResponseDTO> GetAllVehicles();
 
         public Task<GetSingleVehicleResponseDTO> GetSingleVehicle(Guid id);
+
+        public Task<VehicleResponseDTO> RemoveVehicle(Guid id); 
     }
 }
