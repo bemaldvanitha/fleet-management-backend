@@ -7,5 +7,7 @@ namespace fleet_management_backend.Repositories.Vehicles
         public Task<AddVehicleResponseDTO> AddVehicle(AddVehicleRequestDTO addVehicleRequest);
 
         public Task<GetAllVehicleResponseDTO> GetAllVehicles();
+
+        public Task<GetSingleVehicleResponseDTO> GetSingleVehicle(Guid id);
     }
 }

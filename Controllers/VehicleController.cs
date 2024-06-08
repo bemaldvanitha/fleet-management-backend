@@ -66,5 +66,32 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpGet]
+        [Route("{vehicle_id}")]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> GetSingleVehicle([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                GetSingleVehicleResponseDTO getSingleVehicleResponse = await _vehicleRepository.GetSingleVehicle(Guid.Parse(vehicle_id));
+
+                if(getSingleVehicleResponse.StatusCode == 500)
+                {
+                    return BadRequest(getSingleVehicleResponse);
+                }
+
+                if(getSingleVehicleResponse.StatusCode == 400)
+                {
+                    return NotFound(getSingleVehicleResponse);
+                }
+
+                return Ok(getSingleVehicleResponse);
+
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

@@ -18,7 +18,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+var awsOptions = builder.Configuration.GetAWSOptions();
+awsOptions.Region = Amazon.RegionEndpoint.APSouth1;
+
+builder.Services.AddDefaultAWSOptions(awsOptions);
 
 builder.Services.AddAWSService<Amazon.S3.IAmazonS3>();
 

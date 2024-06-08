@@ -1,4 +1,6 @@
-﻿using fleet_management_backend.Data;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using fleet_management_backend.Data;
 using fleet_management_backend.Models.Domains;
 using fleet_management_backend.Models.DTO.Vehicle;
 using Microsoft.EntityFrameworkCore;
@@ -8,10 +10,12 @@ namespace fleet_management_backend.Repositories.Vehicles
     public class VehicleRepository : IVehicleRepository
     {
         private readonly FleetManagerDbContext _context;
+        private readonly IAmazonS3 _amazonS3;
 
-        public VehicleRepository(FleetManagerDbContext context)
+        public VehicleRepository(FleetManagerDbContext context, IAmazonS3 amazonS3)
         {
             this._context = context;
+            this._amazonS3 = amazonS3;
         }
 
         public async Task<AddVehicleResponseDTO> AddVehicle(AddVehicleRequestDTO addVehicleRequest)
@@ -154,6 +158,81 @@ namespace fleet_management_backend.Repositories.Vehicles
                 Console.WriteLine(ex.Message);
 
                 return new GetAllVehicleResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
+        public async Task<GetSingleVehicleResponseDTO> GetSingleVehicle(Guid id)
+        {
+            try
+            {
+                string bucketName = "myfleetmanager";
+                DateTime expiration = DateTime.Now.AddHours(1);
+
+                var singleVehicle = await _context.Vehicle.Include(x => x.VehicleModel).Include(x => x.VehicleBrand).Include(x => x.VehicleStatus)
+                    .Include(x => x.VehicleCertifications).ThenInclude(certificate => certificate.CertificationType)
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if(singleVehicle == null)
+                {
+                    return new GetSingleVehicleResponseDTO
+                    {
+                        Message = "Vehicle Not Found",
+                        StatusCode = 400
+                    };
+                }
+
+                List<SingleVehicleCertificate> VehicleCertificates = new List<SingleVehicleCertificate>();
+
+                foreach(var certification in singleVehicle.VehicleCertifications)
+                {
+                    GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
+                    {
+                        BucketName = bucketName,
+                        Key = "vehicle/" + certification.Certification,
+                        Protocol = Protocol.HTTPS,
+                        Expires = expiration,
+                        Verb = HttpVerb.GET
+                    };
+
+                    string url = _amazonS3.GetPreSignedURL(request);
+
+                    var certificate = new SingleVehicleCertificate
+                    {
+                        Certificate = url,
+                        CertificateType = certification.CertificationType.Type
+                    };
+
+                    VehicleCertificates.Add(certificate);
+                }
+
+                return new GetSingleVehicleResponseDTO
+                {
+                    Message = "Vehicle Data Featched",
+                    StatusCode = 200,
+                    Vehicle = new SingleVehicleResponse
+                    {
+                        Id = id,
+                        Brand = singleVehicle.VehicleBrand.Brand,
+                        IsBrandNew = singleVehicle.IsActive,
+                        ManufacturedAt = singleVehicle.ManufacturedAt,
+                        RegistrationNumber = singleVehicle.RegistrationNumber,
+                        PurchasedAt = singleVehicle.PurchasedAt,
+                        Model = singleVehicle.VehicleModel.Model,
+                        Status = singleVehicle.VehicleStatus.Status,
+                        VIN = singleVehicle.VIN,
+                        VehicleCertificates = VehicleCertificates
+                    }
+                };
+
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new GetSingleVehicleResponseDTO
                 {
                     Message = ex.Message,
                     StatusCode = 500
