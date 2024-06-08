@@ -1,5 +1,6 @@
 using fleet_management_backend.Data;
 using fleet_management_backend.Repositories.Auth;
+using fleet_management_backend.Repositories.Drivers;
 using fleet_management_backend.Repositories.File;
 using fleet_management_backend.Repositories.Vehicles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,6 +33,7 @@ builder.Services.AddDbContext<FleetManagerDbContext>(option =>
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 
