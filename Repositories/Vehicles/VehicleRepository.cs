@@ -121,6 +121,76 @@ namespace fleet_management_backend.Repositories.Vehicles
             }
         }
 
+        public async Task<VehicleResponseDTO> ChangeStatus(Guid id)
+        {
+            try
+            {
+                var changedVehicle = await _context.Vehicle.Include(x => x.VehicleStatus).FirstOrDefaultAsync(x => x.Id == id);
+
+                if (changedVehicle == null)
+                {
+                    return new VehicleResponseDTO
+                    {
+                        Message = "Vehcile Not Found",
+                        StatusCode = 400
+                    };
+                }
+
+                if(changedVehicle.VehicleStatus.Status == "Available")
+                {
+                    var status = await _context.VehicleStatus.FirstOrDefaultAsync(x => x.Status == "Unavailable");
+
+                    if(status == null)
+                    {
+                        status = new VehicleStatus
+                        {
+                            Status = "Unavailable"
+                        };
+
+                        await _context.VehicleStatus.AddAsync(status);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    changedVehicle.VehicleStatusId = status.Id;
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    var status = await _context.VehicleStatus.FirstOrDefaultAsync(x => x.Status == "Available");
+
+                    if (status == null)
+                    {
+                        status = new VehicleStatus
+                        {
+                            Status = "Available"
+                        };
+
+                        await _context.VehicleStatus.AddAsync(status);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    changedVehicle.VehicleStatusId = status.Id;
+                    await _context.SaveChangesAsync();
+                }
+
+                return new VehicleResponseDTO
+                {
+                    Message = "Status Changed",
+                    StatusCode = 200
+                };
+
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new VehicleResponseDTO 
+                { 
+                    Message = ex.Message,
+                    StatusCode = 500 
+                };
+            }
+        }
+
         public async Task<GetAllVehicleResponseDTO> GetAllVehicles()
         {
             try
