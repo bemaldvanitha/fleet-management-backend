@@ -13,5 +13,7 @@ namespace fleet_management_backend.Repositories.Trips
         public Task<TripResponseDTO> VehicleStopStart(Guid Id, VehicleStopStartRequestDTO vehicleStopStartRequest);
 
         public Task<TripResponseDTO> VehicleStopEnd(Guid Id);
+
+        public Task<TripResponseDTO> VehicleTripEnd(Guid Id);
     }
 }

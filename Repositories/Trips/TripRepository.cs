@@ -243,5 +243,41 @@ namespace fleet_management_backend.Repositories.Trips
                 };
             }
         }
+
+        public async Task<TripResponseDTO> VehicleTripEnd(Guid Id)
+        {
+            try
+            {
+                var stopingTrip = await _context.Trip.FirstOrDefaultAsync(t => t.Id == Id);
+
+                if(stopingTrip == null)
+                {
+                    return new TripResponseDTO
+                    {
+                        Message = "Trip Not Found",
+                        StatusCode = 404
+                    };
+                }
+
+                stopingTrip.EndTime = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return new TripResponseDTO
+                {
+                    StatusCode = 200,
+                    Message = "Vehicle Trip Ended"
+                };
+
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new TripResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
     }
 }

@@ -132,5 +132,31 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpPatch]
+        [Route("End/{vehicle_id}")]
+        [Authorize(Policy = "DriverPolicy")]
+        public async Task<IActionResult> TripEnded([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var tripStoped = await _tripRepository.VehicleTripEnd(Guid.Parse(vehicle_id));
+
+                if(tripStoped.StatusCode == 500)
+                { 
+                    return BadRequest(tripStoped); 
+                }
+
+                if (tripStoped.StatusCode == 404)
+                {
+                    return NotFound(tripStoped);
+                }
+
+                return Ok(tripStoped);
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }
