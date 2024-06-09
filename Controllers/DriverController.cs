@@ -115,5 +115,31 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpDelete]
+        [Route("Delete/{vehicle_id}")]
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<IActionResult> DeleteDriver([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var deleteDriver = await _driverRepository.DeleteDriver(Guid.Parse(vehicle_id));
+
+                if(deleteDriver.StatusCode == 500)
+                {
+                    return BadRequest(deleteDriver);
+                }
+
+                if(deleteDriver.StatusCode == 404)
+                {
+                    return NotFound(deleteDriver);
+                }
+
+                return Ok(deleteDriver);
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

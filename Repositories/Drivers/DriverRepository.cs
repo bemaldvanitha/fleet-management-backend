@@ -162,6 +162,45 @@ namespace fleet_management_backend.Repositories.Drivers
             }
         }
 
+        public async Task<DriverResponseDTO> DeleteDriver(Guid id)
+        {
+            try
+            {
+                var deletingDriver = await _context.Drivers.FirstOrDefaultAsync(x => x.Id == id);
+
+                if(deletingDriver == null)
+                {
+                    return new DriverResponseDTO
+                    {
+                        Message = "Driver Removed",
+                        StatusCode = 404
+                    };
+                }
+
+                var deletingDriverCertifications = await _context.DriverCertifications.Where(x => x.DriverId == id).ToListAsync();
+
+                _context.DriverCertifications.RemoveRange(deletingDriverCertifications);
+                _context.Drivers.Remove(deletingDriver);
+                await _context.SaveChangesAsync();
+
+                return new DriverResponseDTO
+                {
+                    Message = "Driver Removed",
+                    StatusCode = 200
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new DriverResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<GetAllDriversResponseDTO> GetAllDrivers()
         {
             try
