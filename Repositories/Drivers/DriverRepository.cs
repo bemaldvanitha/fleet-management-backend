@@ -87,5 +87,47 @@ namespace fleet_management_backend.Repositories.Drivers
                 };
             }
         }
+
+        public async Task<GetAllDriversResponseDTO> GetAllDrivers()
+        {
+            try
+            {
+                var allDrivers = await _context.Drivers.Include(x => x.DriverStatus).Include(x => x.User).ToListAsync();
+
+                List<DriverResponseObj> drivers = new List<DriverResponseObj>();
+
+                foreach (var driver in allDrivers)
+                {
+                    DriverResponseObj driverObj = new DriverResponseObj
+                    {
+                        Id = driver.Id,
+                        FirstName = driver.FirstName,
+                        LastName = driver.LastName,
+                        LicenceNumber = driver.LicenceNumber,
+                        Status = driver.DriverStatus.Status,
+                        MobileNumber = driver.User.MobileNumber,
+                    };
+
+                    drivers.Add(driverObj);
+                }
+
+                return new GetAllDriversResponseDTO 
+                {
+                    Drivers = drivers,
+                    Message = "All Drivers Fetched",
+                    StatusCode = 200
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new GetAllDriversResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
     }
 }

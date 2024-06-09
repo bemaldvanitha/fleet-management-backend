@@ -5,5 +5,9 @@ namespace fleet_management_backend.Repositories.Drivers
     public interface IDriverRepository
     {
         public Task<DriverResponseDTO> AddDriver(AddDriverRequestDTO addDriverRequest);
+
+        public Task<GetAllDriversResponseDTO> GetAllDrivers();
+
+        public Task<GetSingleDriverResponseDTO> GetSingleDriver();
     }
 }

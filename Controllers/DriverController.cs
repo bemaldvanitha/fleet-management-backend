@@ -43,5 +43,25 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpGet]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> GetAllDrivers()
+        {
+            try
+            {
+                GetAllDriversResponseDTO getAllDrivers = await _driverRepository.GetAllDrivers();
+
+                if(getAllDrivers.StatusCode == 500)
+                {
+                    return BadRequest(getAllDrivers);
+                }
+
+                return Ok(getAllDrivers);
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }
