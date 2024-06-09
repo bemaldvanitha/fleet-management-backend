@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using fleet_management_backend.Data;
 
@@ -10,9 +11,11 @@ using fleet_management_backend.Data;
 namespace fleet_management_backend.Migrations
 {
     [DbContext(typeof(FleetManagerDbContext))]
-    partial class FleetManagerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240609091432_Trip documents tables")]
+    partial class Tripdocumentstables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

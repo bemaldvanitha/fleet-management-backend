@@ -29,6 +29,10 @@ namespace fleet_management_backend.Data
 
         public DbSet<Trip> Trip { get; set; }
 
+        public DbSet<TripCertification> TripCertifications { get; set; }
+
+        public DbSet<TripCertificationType> TripCertificationTypes { get; set; }
+
         public DbSet<TripLocation> TripLocation { get; set; }
 
         public DbSet<TripStop> TripStop { get; set; }

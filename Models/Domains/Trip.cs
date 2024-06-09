@@ -33,5 +33,7 @@ namespace fleet_management_backend.Models.Domains
         public ICollection<TripStop> TripStops { get; set; }
 
         public ICollection<TripLocation> TripLocations { get; set; }
+
+        public ICollection<TripCertification> TripCertifications { get; set; }
     }
 }
