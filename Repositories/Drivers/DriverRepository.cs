@@ -314,5 +314,55 @@ namespace fleet_management_backend.Repositories.Drivers
             }
                 
         }
+
+        public async Task<DriverResponseDTO> UpdateDriver(UpdateDriverRequestDTO updateDriverRequest, Guid Id)
+        {
+            try
+            {
+                var updatingDriver = await _context.Drivers.Include(x => x.DriverCertifications)
+                        .ThenInclude(certification => certification.CertificationType).FirstOrDefaultAsync(x => x.Id == Id);
+
+                if(updatingDriver == null)
+                {
+                    return new DriverResponseDTO
+                    {
+                        Message = "Driver Not Found",
+                        StatusCode = 404
+                    };
+                }
+
+                foreach(var certification in updatingDriver.DriverCertifications)
+                {
+                    var isChanging = updateDriverRequest.VehicleCertifications.FirstOrDefault(x => x.CertificateType ==
+                        certification.CertificationType.Type);
+
+                    if(isChanging != null)
+                    {
+                        certification.Certification = isChanging.Certificate;
+                    }
+                }
+
+                updatingDriver.FirstName = updateDriverRequest.FirstName;
+                updatingDriver.LastName = updateDriverRequest.LastName;
+                updatingDriver.LicenceNumber = updateDriverRequest.LicenceNumber;
+                await _context.SaveChangesAsync();
+
+                return new DriverResponseDTO
+                {
+                    Message = "Driver Updated",
+                    StatusCode = 200
+                };
+
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new DriverResponseDTO
+                {
+                    Message= ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
     }
 }

@@ -141,5 +141,31 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpPatch]
+        [Route("Update/{vehicle_id}")]
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<IActionResult> UpdateDriver([FromBody] UpdateDriverRequestDTO updateDriver, [FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var updatingDriver = await _driverRepository.UpdateDriver(updateDriver, Guid.Parse(vehicle_id));
+
+                if(updatingDriver.StatusCode == 500)
+                {
+                    return BadRequest(updatingDriver);
+                }
+
+                if(updatingDriver.StatusCode == 404)
+                {
+                    return NotFound(updatingDriver);
+                }
+
+                return Ok(updatingDriver);
+            }catch(Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }
