@@ -37,5 +37,53 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpPatch]
+        [Route("Start/{vehicle_id}")]
+        [Authorize(Policy = "DriverPolicy")]
+        public async Task<IActionResult> StartTrip([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var startingTrip = await _tripRepository.StartTrip(Guid.Parse(vehicle_id));
+
+                if(startingTrip.StatusCode == 500)
+                {
+                    return BadRequest(startingTrip);
+                }
+
+                if(startingTrip.StatusCode == 404)
+                {
+                    return NotFound(startingTrip);
+                }
+
+                return Ok(startingTrip);
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpPatch]
+        [Route("Location/{vehicle_id}")]
+        [Authorize(Policy = "DriverPolicy")]
+        public async Task<IActionResult> SetCurrentTripLocation([FromRoute] string vehicle_id, [FromBody] TripLocationRequestDTO tripLocationRequest)
+        {
+            try
+            {
+                var currentLocation = await _tripRepository.AddCurrentLocation(Guid.Parse(vehicle_id), tripLocationRequest);
+
+                if(currentLocation.StatusCode == 500)
+                {
+                    return BadRequest(currentLocation);
+                }
+
+                return Ok(currentLocation);
+
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

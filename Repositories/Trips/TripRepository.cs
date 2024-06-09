@@ -14,6 +14,46 @@ namespace fleet_management_backend.Repositories.Trips
             this._context = context;
         }
 
+        public async Task<TripResponseDTO> AddCurrentLocation(Guid Id, TripLocationRequestDTO tripLocationRequest)
+        {
+            try
+            {
+                var location = new Location
+                {
+                    Latitude = tripLocationRequest.Latitude,
+                    Longitude = tripLocationRequest.Longitude,
+                };
+
+                await _context.Location.AddAsync(location);
+                await _context.SaveChangesAsync();
+
+                var tripLocation = new TripLocation
+                {
+                    TripId = Id,
+                    LocationId = location.Id,
+                };
+
+                await _context.TripLocation.AddAsync(tripLocation);
+                await _context.SaveChangesAsync();
+
+                return new TripResponseDTO
+                {
+                    Message = "Current Location Saved",
+                    StatusCode = 200
+                };
+
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+
+                return new TripResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<TripResponseDTO> CreateTrip(StartTripRequestDTO startTripRequest)
         {
             try
@@ -79,6 +119,42 @@ namespace fleet_management_backend.Repositories.Trips
                 };
 
             }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new TripResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
+        public async Task<TripResponseDTO> StartTrip(Guid Id)
+        {
+            try
+            {
+                var startingTrip = await _context.Trip.FirstOrDefaultAsync(x => x.Id == Id);
+
+                if(startingTrip == null)
+                {
+                    return new TripResponseDTO
+                    {
+                        Message = "Trip Not Found",
+                        StatusCode = 404
+                    };
+                }
+
+                startingTrip.StartTime = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return new TripResponseDTO
+                {
+                    Message = "Trip Started",
+                    StatusCode = 200
+                };
+
+            }catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
 

@@ -6,6 +6,8 @@ namespace fleet_management_backend.Repositories.Trips
     {
         public Task<TripResponseDTO> CreateTrip(StartTripRequestDTO startTripRequest);
 
+        public Task<TripResponseDTO> StartTrip(Guid Id);
 
+        public Task<TripResponseDTO> AddCurrentLocation(Guid Id, TripLocationRequestDTO tripLocationRequest);
     }
 }
