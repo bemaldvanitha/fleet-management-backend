@@ -165,5 +165,47 @@ namespace fleet_management_backend.Repositories.Trips
                 };
             }
         }
+
+        public async Task<TripResponseDTO> VehicleStopStart(Guid Id, VehicleStopStartRequestDTO vehicleStopStartRequest)
+        {
+            try
+            {
+                var location = new Location
+                {
+                    Latitude = vehicleStopStartRequest.StopLocation.Latitude,
+                    Longitude = vehicleStopStartRequest.StopLocation.Longitude
+                };
+
+                await _context.Location.AddAsync(location);
+                await _context.SaveChangesAsync();
+
+                var vehicleStop = new TripStop
+                {
+                    LocationId = location.Id,
+                    Reason = vehicleStopStartRequest.Reason,
+                    StartTime = DateTime.Now,
+                    TripId = Id,
+                };
+
+                await _context.TripStop.AddAsync(vehicleStop);
+                await _context.SaveChangesAsync();
+
+                return new TripResponseDTO
+                {
+                    Message = "Trip Stop Added",
+                    StatusCode = 200
+                };
+
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new TripResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
     }
 }

@@ -26,13 +26,13 @@ namespace fleet_management_backend.Controllers
             {
                 var tripCreate = await _tripRepository.CreateTrip(startTripRequest);
 
-                if(tripCreate.StatusCode == 500)
+                if (tripCreate.StatusCode == 500)
                 {
                     return BadRequest(tripCreate);
                 }
 
                 return Ok(tripCreate);
-            }catch (Exception ex)
+            } catch (Exception ex)
             {
                 return BadRequest("Something went wrong");
             }
@@ -47,18 +47,18 @@ namespace fleet_management_backend.Controllers
             {
                 var startingTrip = await _tripRepository.StartTrip(Guid.Parse(vehicle_id));
 
-                if(startingTrip.StatusCode == 500)
+                if (startingTrip.StatusCode == 500)
                 {
                     return BadRequest(startingTrip);
                 }
 
-                if(startingTrip.StatusCode == 404)
+                if (startingTrip.StatusCode == 404)
                 {
                     return NotFound(startingTrip);
                 }
 
                 return Ok(startingTrip);
-            }catch (Exception ex)
+            } catch (Exception ex)
             {
                 return BadRequest("Something went wrong");
             }
@@ -73,13 +73,34 @@ namespace fleet_management_backend.Controllers
             {
                 var currentLocation = await _tripRepository.AddCurrentLocation(Guid.Parse(vehicle_id), tripLocationRequest);
 
-                if(currentLocation.StatusCode == 500)
+                if (currentLocation.StatusCode == 500)
                 {
                     return BadRequest(currentLocation);
                 }
 
                 return Ok(currentLocation);
 
+            } catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpPatch]
+        [Route("Stop/Start/{vehicle_id}")]
+        [Authorize(Policy = "DriverPolicy")]
+        public async Task<IActionResult> VehicleStopStart([FromRoute] string vehicle_id, [FromBody] VehicleStopStartRequestDTO vehicleStopStartRequest)
+        {
+            try
+            {
+                var vehicleStop = await _tripRepository.VehicleStopStart(Guid.Parse(vehicle_id), vehicleStopStartRequest);
+
+                if(vehicleStop.StatusCode == 500)
+                {
+                    return BadRequest(vehicleStop);
+                }
+
+                return Ok(vehicleStop);
             }catch (Exception ex)
             {
                 return BadRequest("Something went wrong");
