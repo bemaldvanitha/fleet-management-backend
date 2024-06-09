@@ -235,6 +235,48 @@ namespace fleet_management_backend.Repositories.Vehicles
             }
         }
 
+        public async Task<GetAllVehicleResponseDTO> GetAvailableVehicles()
+        {
+            try
+            {
+                var availableVehicles = await _context.Vehicle.Include(x => x.VehicleModel).Include(x => x.VehicleBrand)
+                    .Include(x => x.VehicleStatus).Where(x => x.VehicleStatus.Status == "Available").ToListAsync();
+
+                List<VehicleResponseObj> vehicles = new List<VehicleResponseObj>();
+
+                foreach (var vehicle in availableVehicles)
+                {
+                    var vehicleObject = new VehicleResponseObj
+                    {
+                        Id = vehicle.Id,
+                        Brand = vehicle.VehicleBrand.Brand,
+                        Model = vehicle.VehicleModel.Model,
+                        RegistrationNumber = vehicle.RegistrationNumber,
+                        Status = vehicle.VehicleStatus.Status,
+                        VIN = vehicle.VIN
+                    };
+
+                    vehicles.Add(vehicleObject);
+                }
+
+                return new GetAllVehicleResponseDTO 
+                { 
+                    Vehicles = vehicles,
+                    Message = "Fetch Available Vehicles",
+                    StatusCode = 200
+                };
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new GetAllVehicleResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<GetSingleVehicleResponseDTO> GetSingleVehicle(Guid id)
         {
             try

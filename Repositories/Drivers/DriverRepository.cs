@@ -243,6 +243,49 @@ namespace fleet_management_backend.Repositories.Drivers
             }
         }
 
+        public async Task<GetAllDriversResponseDTO> GetAvailableDrivers()
+        {
+            try
+            {
+                var availableDrivers = await _context.Drivers.Include(x => x.User).Include(x => x.DriverStatus).Where(x => 
+                    x.DriverStatus.Status == "Available").ToListAsync();
+
+                List<DriverResponseObj> drivers = new List<DriverResponseObj>();
+
+                foreach (var driver in availableDrivers)
+                {
+                    var driverObj = new DriverResponseObj
+                    {
+                        FirstName = driver.FirstName,
+                        LastName = driver.LastName,
+                        Status = driver.DriverStatus.Status,
+                        LicenceNumber= driver.LicenceNumber,
+                        Id = driver.Id,
+                        MobileNumber = driver.User.MobileNumber
+                    };
+
+                    drivers.Add(driverObj);
+                }
+                return new GetAllDriversResponseDTO 
+                { 
+                    Drivers = drivers,
+                    Message = "Available Drivers Fetched",
+                    StatusCode = 200 
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new GetAllDriversResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+
+        }
+
         public async Task<GetSingleDriverResponseDTO> GetSingleDriver(Guid Id)
         {
             try

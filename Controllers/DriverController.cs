@@ -65,6 +65,27 @@ namespace fleet_management_backend.Controllers
         }
 
         [HttpGet]
+        [Route("Available")]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> GetAvailableDrivers()
+        {
+            try
+            {
+                var getAvailableDrivers = await _driverRepository.GetAvailableDrivers();
+
+                if(getAvailableDrivers.StatusCode == 500)
+                {
+                    return BadRequest(getAvailableDrivers);
+                }
+
+                return Ok(getAvailableDrivers);
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpGet]
         [Route("{vehicle_id}")]
         [Authorize(Policy = "AdminOrFleetManagerPolicy")]
         public async Task<IActionResult> GetSingleDriver([FromRoute] string vehicle_id)

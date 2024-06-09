@@ -68,6 +68,27 @@ namespace fleet_management_backend.Controllers
         }
 
         [HttpGet]
+        [Route("Available")]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> GetAvailableVehicles()
+        {
+            try
+            {
+                var vehicleResponse = await _vehicleRepository.GetAvailableVehicles();
+
+                if(vehicleResponse.StatusCode == 500)
+                {
+                    return BadRequest(vehicleResponse);
+                }
+
+                return Ok(vehicleResponse);
+            }catch(Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpGet]
         [Route("{vehicle_id}")]
         [Authorize(Policy = "AdminOrFleetManagerPolicy")]
         public async Task<IActionResult> GetSingleVehicle([FromRoute] string vehicle_id)
