@@ -166,6 +166,42 @@ namespace fleet_management_backend.Repositories.Trips
             }
         }
 
+        public async Task<TripResponseDTO> VehicleStopEnd(Guid Id)
+        {
+            try
+            {
+                var checkStartedStop = await _context.TripStop.FirstOrDefaultAsync(x => x.TripId == Id && x.EndTime == null);
+
+                if(checkStartedStop == null)
+                {
+                    return new TripResponseDTO
+                    {
+                        Message = "Trip Stop Not Found",
+                        StatusCode = 404
+                    };
+                }
+
+                checkStartedStop.EndTime = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return new TripResponseDTO
+                {
+                    Message = "Trip Stop Ended",
+                    StatusCode = 200
+                };
+
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new TripResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<TripResponseDTO> VehicleStopStart(Guid Id, VehicleStopStartRequestDTO vehicleStopStartRequest)
         {
             try

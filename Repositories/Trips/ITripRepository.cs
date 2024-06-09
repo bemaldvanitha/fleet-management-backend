@@ -11,5 +11,7 @@ namespace fleet_management_backend.Repositories.Trips
         public Task<TripResponseDTO> AddCurrentLocation(Guid Id, TripLocationRequestDTO tripLocationRequest);
 
         public Task<TripResponseDTO> VehicleStopStart(Guid Id, VehicleStopStartRequestDTO vehicleStopStartRequest);
+
+        public Task<TripResponseDTO> VehicleStopEnd(Guid Id);
     }
 }
