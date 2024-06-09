@@ -1,4 +1,6 @@
-﻿using fleet_management_backend.Data;
+﻿using Amazon.S3.Model;
+using Amazon.S3;
+using fleet_management_backend.Data;
 using fleet_management_backend.Models.Domains;
 using fleet_management_backend.Models.DTO.Driver;
 using Microsoft.EntityFrameworkCore;
@@ -8,10 +10,12 @@ namespace fleet_management_backend.Repositories.Drivers
     public class DriverRepository : IDriverRepository
     {
         private readonly FleetManagerDbContext _context;
+        private readonly IAmazonS3 _amazonS3;
 
-        public DriverRepository(FleetManagerDbContext context)
+        public DriverRepository(FleetManagerDbContext context, IAmazonS3 amazonS3)
         {
             this._context = context;
+            this._amazonS3 = amazonS3;
         }
 
         public async Task<DriverResponseDTO> AddDriver(AddDriverRequestDTO addDriverRequest)
@@ -128,6 +132,78 @@ namespace fleet_management_backend.Repositories.Drivers
                     StatusCode = 500
                 };
             }
+        }
+
+        public async Task<GetSingleDriverResponseDTO> GetSingleDriver(Guid Id)
+        {
+            try
+            {
+                string bucketName = "myfleetmanager";
+                DateTime expiration = DateTime.Now.AddHours(1);
+
+                var singleDriver = await _context.Drivers.Include(x => x.DriverStatus).Include(x => x.DriverCertifications)
+                    .ThenInclude(certificate => certificate.CertificationType).Include(u => u.User)
+                    .FirstOrDefaultAsync(x => x.Id == Id);
+
+                if(singleDriver == null)
+                {
+                    return new GetSingleDriverResponseDTO
+                    {
+                        Message = "No Driver Found",
+                        StatusCode = 404
+                    };
+                }
+
+                List<SingleDriverCertificate> driverCertificates = new List<SingleDriverCertificate>();
+
+                foreach(var certificate in singleDriver.DriverCertifications)
+                {
+                    GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
+                    {
+                        BucketName = bucketName,
+                        Key = "driver/" + certificate.Certification,
+                        Protocol = Protocol.HTTPS,
+                        Expires = expiration,
+                        Verb = HttpVerb.GET
+                    };
+
+                    string url = _amazonS3.GetPreSignedURL(request);
+
+                    var certificateObj = new SingleDriverCertificate
+                    {
+                        Certificate = url,
+                        CertificationType = certificate.CertificationType.Type,
+                    };
+
+                    driverCertificates.Add(certificateObj);
+                }
+
+                return new GetSingleDriverResponseDTO
+                {
+                    Message = "Fetch Driver",
+                    StatusCode = 200,
+                    Driver = new SingleDriverObj
+                    {
+                        FirstName = singleDriver.FirstName,
+                        LastName = singleDriver.LastName,
+                        Id = Id,
+                        LicenceNumber = singleDriver.LicenceNumber,
+                        Status = singleDriver.DriverStatus.Status,
+                        Certificates = driverCertificates
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new GetSingleDriverResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+                
         }
     }
 }

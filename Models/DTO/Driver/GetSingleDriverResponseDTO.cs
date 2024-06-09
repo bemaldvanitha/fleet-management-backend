@@ -6,7 +6,7 @@
 
         public int StatusCode { get; set; }
 
-        public DriverResponseObj? Driver { get; set; }
+        public SingleDriverObj? Driver { get; set; }
     }
 
     public class SingleDriverObj
@@ -21,7 +21,7 @@
 
         public string LicenceNumber { get; set; }
 
-        public List<SingleDriverCertificate> Certificates { get; set; }
+        public List<SingleDriverCertificate>? Certificates { get; set; }
     }
 
     public class SingleDriverCertificate
