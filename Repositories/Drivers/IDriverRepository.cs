@@ -10,6 +10,8 @@ namespace fleet_management_backend.Repositories.Drivers
 
         public Task<GetSingleDriverResponseDTO> GetSingleDriver(Guid id);
 
-        public Task<DriverResponseDTO> ChangeDriverStatus();
+        public Task<DriverResponseDTO> ChangeDriverStatus(Guid id);
+
+        public Task<DriverResponseDTO> DeleteDriver(Guid id);
     }
 }

@@ -63,5 +63,57 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpGet]
+        [Route("{vehicle_id}")]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> GetSingleDriver([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var singleDriver = await _driverRepository.GetSingleDriver(Guid.Parse(vehicle_id));
+
+                if(singleDriver.StatusCode == 500)
+                {
+                    return BadRequest(singleDriver);
+                }
+
+                if(singleDriver.StatusCode == 404)
+                {
+                    return NotFound(singleDriver);
+                }
+
+                return Ok(singleDriver);
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+        [HttpPatch]
+        [Route("Status/{vehicle_id}")]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> UpdateDriverStatus([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var updateDriverStatus = await _driverRepository.ChangeDriverStatus(Guid.Parse(vehicle_id));
+
+                if(updateDriverStatus.StatusCode == 500)
+                {
+                    return BadRequest(updateDriverStatus);
+                }
+
+                if(updateDriverStatus.StatusCode == 404)
+                {
+                    return NotFound(updateDriverStatus);
+                }
+
+                return Ok(updateDriverStatus);
+            }catch(Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

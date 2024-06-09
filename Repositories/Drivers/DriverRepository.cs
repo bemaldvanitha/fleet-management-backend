@@ -92,6 +92,76 @@ namespace fleet_management_backend.Repositories.Drivers
             }
         }
 
+        public async Task<DriverResponseDTO> ChangeDriverStatus(Guid Id)
+        {
+            try
+            {
+                var driver = await _context.Drivers.Include(x => x.DriverStatus).FirstOrDefaultAsync(x => x.Id == Id);
+
+                if(driver == null)
+                {
+                    return new DriverResponseDTO
+                    {
+                        Message = "No Driver Found",
+                        StatusCode = 404
+                    };
+                }
+
+                if(driver.DriverStatus.Status == "Available")
+                {
+                    var status = await _context.DriverStatus.FirstOrDefaultAsync(x => x.Status == "Unavailable");
+
+                    if(status == null)
+                    {
+                        status = new DriverStatus
+                        {
+                            Status = "Unavailable"
+                        };
+
+                        await _context.DriverStatus.AddAsync(status);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    driver.DriverStatusId = status.Id;
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    var status = await _context.DriverStatus.FirstOrDefaultAsync(x => x.Status == "Available");
+
+                    if (status == null)
+                    {
+                        status = new DriverStatus
+                        {
+                            Status = "Available"
+                        };
+
+                        await _context.DriverStatus.AddAsync(status);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    driver.DriverStatusId = status.Id;
+                    await _context.SaveChangesAsync();
+                }
+
+                return new DriverResponseDTO
+                {
+                    Message = "Driver Status Changed",
+                    StatusCode = 200
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new DriverResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<GetAllDriversResponseDTO> GetAllDrivers()
         {
             try
