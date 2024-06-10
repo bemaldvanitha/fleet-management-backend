@@ -1,4 +1,6 @@
-﻿using fleet_management_backend.Data;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using fleet_management_backend.Data;
 using fleet_management_backend.Models.Domains;
 using fleet_management_backend.Models.DTO.Trip;
 using Microsoft.EntityFrameworkCore;
@@ -8,10 +10,12 @@ namespace fleet_management_backend.Repositories.Trips
     public class TripRepository: ITripRepository
     {
         private readonly FleetManagerDbContext _context;
+        private readonly IAmazonS3 _amazonS3;
 
-        public TripRepository(FleetManagerDbContext context)
+        public TripRepository(FleetManagerDbContext context, IAmazonS3 amazonS3)
         {
             this._context = context;
+            this._amazonS3 = amazonS3;
         }
 
         public async Task<TripResponseDTO> AddCurrentLocation(Guid Id, TripLocationRequestDTO tripLocationRequest)
@@ -306,12 +310,63 @@ namespace fleet_management_backend.Repositories.Trips
             }
         }
 
+        public async Task<TripResponseDTO> RemovePendingTrip(Guid Id)
+        {
+            try
+            {
+                var deletingTrip = await _context.Trip.FirstOrDefaultAsync(x => x.Id == Id);
+
+                if(deletingTrip == null) 
+                {
+                    return new TripResponseDTO
+                    {
+                        Message = "Trip Not Found",
+                        StatusCode = 404
+                    };
+                }
+
+                if(deletingTrip.StartTime != null || deletingTrip.EndTime != null) 
+                {
+                    return new TripResponseDTO
+                    {
+                        Message = "This Trip Already in Place can not cancel",
+                        StatusCode = 406
+                    };
+                }
+
+                var tripCertifications = await _context.TripCertifications.Where(x => x.TripId == Id).ToListAsync();
+
+                _context.TripCertifications.RemoveRange(tripCertifications);
+                _context.Trip.Remove(deletingTrip);
+                await _context.SaveChangesAsync();
+
+                return new TripResponseDTO
+                {
+                    StatusCode = 200,
+                    Message = "Trip Removed"
+                };
+
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new TripResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<SingleTripResponseDTO> SingleTripResponseDTO(Guid Id)
         {
             try
             {
+                string bucketName = "myfleetmanager";
+                DateTime expiration = DateTime.Now.AddHours(1);
+
                 var trip = await _context.Trip.Include(x => x.TripCertifications).ThenInclude(x => x.TripCertificationType)
-                    .Include(x => x.Vehicle).ThenInclude(x => x.VehicleBrand)
+                    .Include(x => x.Vehicle).ThenInclude(x => x.VehicleBrand).Include(x => x.Vehicle).ThenInclude(x => x.VehicleModel)
                     .Include(x => x.Driver).Include(x => x.TripLocations).ThenInclude(x => x.Location).Include(x => x.TripStops)
                     .ThenInclude(x => x.StopLocation).FirstOrDefaultAsync(x => x.Id == Id);
 
@@ -328,9 +383,20 @@ namespace fleet_management_backend.Repositories.Trips
 
                 foreach(var tripCertification in trip.TripCertifications)
                 {
+                    GetPreSignedUrlRequest request = new GetPreSignedUrlRequest
+                    {
+                        BucketName = bucketName,
+                        Key = "trip/" + tripCertification.Certification,
+                        Protocol = Protocol.HTTPS,
+                        Expires = expiration,
+                        Verb = HttpVerb.GET
+                    };
+
+                    string url = _amazonS3.GetPreSignedURL(request);
+
                     var certificate = new TripCertificationObj
                     {
-                        Certificate = tripCertification.Certification,
+                        Certificate = url,
                         CertificateType = tripCertification.TripCertificationType.Type
                     };
 

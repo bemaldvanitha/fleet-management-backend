@@ -248,5 +248,36 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpDelete]
+        [Route("{vehicle_id}")]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> CancelTrip([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var deletingTrip = await _tripRepository.RemovePendingTrip(Guid.Parse(vehicle_id));
+
+                if(deletingTrip.StatusCode == 500)
+                {
+                    return BadRequest(deletingTrip);
+                }
+
+                if(deletingTrip.StatusCode == 404)
+                {
+                    return NotFound(deletingTrip);
+                }
+
+                if (deletingTrip.StatusCode == 406)
+                {
+                    return BadRequest(deletingTrip);
+                }
+
+                return Ok(deletingTrip);
+            }catch(Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }
