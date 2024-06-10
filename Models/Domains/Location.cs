@@ -11,5 +11,7 @@ namespace fleet_management_backend.Models.Domains
 
         [Required]
         public double Longitude { get; set; }
+
+        public string? Address { get; set; }
     }
 }

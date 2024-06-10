@@ -22,6 +22,7 @@ namespace fleet_management_backend.Repositories.Trips
                 {
                     Latitude = tripLocationRequest.Latitude,
                     Longitude = tripLocationRequest.Longitude,
+                    Address = tripLocationRequest.Address
                 };
 
                 await _context.Location.AddAsync(location);
@@ -61,13 +62,15 @@ namespace fleet_management_backend.Repositories.Trips
                 var startLocation = new Location
                 {
                     Latitude = startTripRequest.StartLocation?.Latitude ?? 0,
-                    Longitude = startTripRequest.StartLocation?.Longitude ?? 0
+                    Longitude = startTripRequest.StartLocation?.Longitude ?? 0,
+                    Address = startTripRequest.StartLocation?.Address ?? "",
                 };
 
                 var endLocation = new Location
                 {
                     Latitude = startTripRequest.EndLocation?.Latitude ?? 0,
-                    Longitude = startTripRequest.EndLocation?.Longitude ?? 0
+                    Longitude = startTripRequest.EndLocation?.Longitude ?? 0,
+                    Address = startTripRequest.EndLocation?.Address ?? ""
                 };
 
                 await _context.Location.AddAsync(startLocation);
@@ -209,7 +212,8 @@ namespace fleet_management_backend.Repositories.Trips
                 var location = new Location
                 {
                     Latitude = vehicleStopStartRequest.StopLocation.Latitude,
-                    Longitude = vehicleStopStartRequest.StopLocation.Longitude
+                    Longitude = vehicleStopStartRequest.StopLocation.Longitude,
+                    Address = vehicleStopStartRequest.StopLocation.Address
                 };
 
                 await _context.Location.AddAsync(location);
