@@ -306,6 +306,109 @@ namespace fleet_management_backend.Repositories.Trips
             }
         }
 
+        public async Task<SingleTripResponseDTO> SingleTripResponseDTO(Guid Id)
+        {
+            try
+            {
+                var trip = await _context.Trip.Include(x => x.TripCertifications).ThenInclude(x => x.TripCertificationType)
+                    .Include(x => x.Vehicle).ThenInclude(x => x.VehicleBrand)
+                    .Include(x => x.Driver).Include(x => x.TripLocations).ThenInclude(x => x.Location).Include(x => x.TripStops)
+                    .ThenInclude(x => x.StopLocation).FirstOrDefaultAsync(x => x.Id == Id);
+
+                if (trip == null)
+                {
+                    return new SingleTripResponseDTO
+                    {
+                        Message = "Trip Not Found",
+                        StatusCode = 404
+                    };
+                }
+
+                var tripCertificationList = new List<TripCertificationObj>();
+
+                foreach(var tripCertification in trip.TripCertifications)
+                {
+                    var certificate = new TripCertificationObj
+                    {
+                        Certificate = tripCertification.Certification,
+                        CertificateType = tripCertification.TripCertificationType.Type
+                    };
+
+                    tripCertificationList.Add(certificate);
+                }
+
+                var tripLocationList = new List<TripLocationObj>();
+
+                foreach(var tripLocationItem in trip.TripLocations)
+                {
+                    var location = new TripLocationObj
+                    {
+                        Address = tripLocationItem.Location.Address,
+                        Latitude = tripLocationItem.Location.Latitude,
+                        Longitude = tripLocationItem.Location.Longitude,
+                    };
+
+                    tripLocationList.Add(location);
+                }
+
+                var tripStopList = new List<TripStopObject>();
+
+                foreach(var stopItem in trip.TripStops)
+                {
+                    var stopLocation = new TripLocationObj
+                    {
+                        Latitude = stopItem.StopLocation.Latitude,
+                        Longitude = stopItem.StopLocation.Longitude,
+                        Address = stopItem.StopLocation.Address
+                    };
+
+                    var stop = new TripStopObject
+                    {
+                        Id = stopItem.Id,
+                        EndTime = stopItem?.EndTime ?? DateTime.Now,
+                        StartTime = stopItem?.StartTime ?? DateTime.Now,
+                        Reason = stopItem?.Reason ?? "",
+                        Location = stopLocation
+                    };
+
+                    tripStopList.Add(stop);
+                }
+
+                var tripFinalObject = new SingleTripObject
+                {
+                    Id = trip.Id,
+                    DriverId = trip.DriverId,
+                    DriverLicenceNumber = trip.Driver.LicenceNumber,
+                    DriverName = trip.Driver.FirstName + " " + trip.Driver.LastName,
+                    StartTime = trip?.StartTime ?? DateTime.Now,
+                    EndTime = trip?.EndTime ?? DateTime.Now,
+                    TripCertifications = tripCertificationList,
+                    TripLocations = tripLocationList,
+                    TripStops = tripStopList,
+                    VehicleDetail = trip.Vehicle.VehicleBrand.Brand + " / " + trip.Vehicle.VehicleModel.Model,
+                    VehicleId = trip.VehicleId,
+                    VehicleVIN = trip.Vehicle.VIN
+                };
+
+                return new SingleTripResponseDTO
+                {
+                    Message = "Single Trip Fetch",
+                    Trip = tripFinalObject,
+                    StatusCode = 200
+                };
+
+            }catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new SingleTripResponseDTO 
+                { 
+                    Message = ex.Message,
+                    StatusCode = 500 
+                };
+            }
+        }
+
         public async Task<TripResponseDTO> StartTrip(Guid Id)
         {
             try

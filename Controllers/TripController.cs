@@ -222,5 +222,31 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpGet]
+        [Route("{vehicle_id}")]
+        [Authorize]
+        public async Task<IActionResult> FetchSingleTrip([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var singleTrip = await _tripRepository.SingleTripResponseDTO(Guid.Parse(vehicle_id));
+
+                if(singleTrip.StatusCode == 500)
+                {
+                    return BadRequest(singleTrip);
+                }
+
+                if(singleTrip.StatusCode == 404)
+                {
+                    return NotFound(singleTrip);
+                }
+
+                return Ok(singleTrip);
+            }catch(Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }
