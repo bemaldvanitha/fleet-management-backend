@@ -15,5 +15,9 @@ namespace fleet_management_backend.Repositories.Trips
         public Task<TripResponseDTO> VehicleStopEnd(Guid Id);
 
         public Task<TripResponseDTO> VehicleTripEnd(Guid Id);
+
+        public Task<TripListResponseDTO> FetchAllTrips();
+
+        public Task<TripListResponseDTO> FetchTripsByDriver(Guid Id);
     }
 }

@@ -158,5 +158,25 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpGet]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> FetchAllTrips()
+        {
+            try
+            {
+                var tripListResponse = await _tripRepository.FetchAllTrips();
+
+                if(tripListResponse.StatusCode == 500)
+                {
+                    return BadRequest(tripListResponse);
+                }
+
+                return Ok(tripListResponse);
+            }catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }
