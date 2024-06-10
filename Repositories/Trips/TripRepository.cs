@@ -248,6 +248,64 @@ namespace fleet_management_backend.Repositories.Trips
             }
         }
 
+        public async Task<TripListResponseDTO> FetchTripsByVehicle(Guid Id)
+        {
+            try
+            {
+                var allTrips = await _context.Trip.Include(x => x.StartLocation).Include(x => x.EndLocation).Include(x => x.Vehicle)
+                    .Include(x => x.Driver).Where(x => x.VehicleId == Id).ToListAsync();
+
+                var tripList = new List<TripListObject>();
+
+                foreach (var trip in allTrips)
+                {
+                    var tripStatus = "";
+
+                    if (trip.StartTime == null)
+                    {
+                        tripStatus = "Pending";
+                    }
+                    else if (trip.EndTime == null)
+                    {
+                        tripStatus = "Driving";
+                    }
+                    else
+                    {
+                        tripStatus = "Ended";
+                    }
+
+                    var tripObject = new TripListObject
+                    {
+                        Id = trip.Id,
+                        DriverName = trip.Driver.FirstName + " " + trip.Driver.LastName,
+                        VehicleVIN = trip.Vehicle.VIN,
+                        EndLocation = trip.EndLocation?.Address ?? "",
+                        StartLocation = trip.StartLocation?.Address ?? "",
+                        TripStatus = tripStatus
+                    };
+
+                    tripList.Add(tripObject);
+                }
+
+                return new TripListResponseDTO
+                {
+                    Trips = tripList,
+                    Message = "All Trip Assign To Vehicle Fetched",
+                    StatusCode = 200
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new TripListResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<TripResponseDTO> StartTrip(Guid Id)
         {
             try

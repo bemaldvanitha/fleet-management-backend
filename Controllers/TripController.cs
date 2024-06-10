@@ -180,13 +180,13 @@ namespace fleet_management_backend.Controllers
         }
 
         [HttpGet]
-        [Route("Driver/{vehicle_id}")]
+        [Route("Driver/{driver_id}")]
         [Authorize]
-        public async Task<IActionResult> FetchTripsAssignToDriver([FromRoute] string vehicle_id)
+        public async Task<IActionResult> FetchTripsAssignToDriver([FromRoute] string driver_id)
         {
             try
             {
-                var tripListResponse = await _tripRepository.FetchTripsByDriver(Guid.Parse(vehicle_id));
+                var tripListResponse = await _tripRepository.FetchTripsByDriver(Guid.Parse(driver_id));
 
                 if (tripListResponse.StatusCode == 500)
                 {
@@ -201,6 +201,26 @@ namespace fleet_management_backend.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("Vehicle/{vehicle_id}")]
+        [Authorize(Policy = "AdminOrFleetManagerPolicy")]
+        public async Task<IActionResult> FetchTripsAssignToVehicle([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var tripListResponse = await _tripRepository.FetchTripsByVehicle(Guid.Parse(vehicle_id));
 
+                if (tripListResponse.StatusCode == 500)
+                {
+                    return BadRequest(tripListResponse);
+                }
+
+                return Ok(tripListResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }
