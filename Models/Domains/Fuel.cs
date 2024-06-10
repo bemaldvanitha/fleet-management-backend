@@ -18,5 +18,7 @@ namespace fleet_management_backend.Models.Domains
 
         [ForeignKey("Location")]
         public Guid LocationId { get; set; }
+
+        public Location Location { get; set; }
     }
 }
