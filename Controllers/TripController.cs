@@ -178,5 +178,29 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpGet]
+        [Route("Driver/{vehicle_id}")]
+        [Authorize]
+        public async Task<IActionResult> FetchTripsAssignToDriver([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var tripListResponse = await _tripRepository.FetchTripsByDriver(Guid.Parse(vehicle_id));
+
+                if (tripListResponse.StatusCode == 500)
+                {
+                    return BadRequest(tripListResponse);
+                }
+
+                return Ok(tripListResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
+
+
     }
 }
