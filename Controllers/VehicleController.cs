@@ -195,5 +195,31 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpGet]
+        [Route("Location/{vehicle_id}")]
+        [Authorize]
+        public async Task<IActionResult> FetchLatestVehicleLocation([FromRoute] string vehicle_id)
+        {
+            try
+            {
+                var latestLocationRes = await _vehicleRepository.GetLastLocation(Guid.Parse(vehicle_id));
+
+                if(latestLocationRes.StatusCode == 500)
+                {
+                    return BadRequest(latestLocationRes);
+                }
+
+                if (latestLocationRes.StatusCode == 404)
+                {
+                    return NotFound(latestLocationRes);
+                }
+
+                return Ok(latestLocationRes);
+            }catch(Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

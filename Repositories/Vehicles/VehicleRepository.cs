@@ -277,6 +277,102 @@ namespace fleet_management_backend.Repositories.Vehicles
             }
         }
 
+        public async Task<GetLastLocationResponseDTO> GetLastLocation(Guid id)
+        {
+            try
+            {
+                var isTripStarted = await _context.Trip.Include(x => x.StartLocation).FirstOrDefaultAsync(x => 
+                    x.VehicleId == id && x.StartTime == null);
+
+                if(isTripStarted != null) 
+                {
+                    return new GetLastLocationResponseDTO
+                    {
+                        Message = "Vehicle Did not start trip yet",
+                        StatusCode = 200,
+                        LastLocation = new LastLocationObj
+                        {
+                            Address = isTripStarted.StartLocation?.Address ?? "",
+                            Latitude = isTripStarted.StartLocation?.Latitude ?? 0,
+                            Longitude = isTripStarted.StartLocation?.Longitude ?? 0
+                        }
+                    };
+                }
+
+                var isTripEnded = await _context.Trip.Include(x => x.EndLocation).FirstOrDefaultAsync(x => x.VehicleId == 
+                    id && x.EndTime != null);
+
+                if (isTripEnded != null)
+                {
+                    return new GetLastLocationResponseDTO
+                    {
+                        Message = "Vehicle ended trip",
+                        StatusCode = 200,
+                        LastLocation = new LastLocationObj
+                        {
+                            Address = isTripEnded?.EndLocation?.Address ?? "",
+                            Latitude = isTripEnded?.EndLocation?.Latitude ?? 0,
+                            Longitude = isTripEnded?.EndLocation?.Longitude ?? 0
+                        }
+                    };
+                }
+
+                var lastTrip = await _context.Trip.Include(x => x.StartLocation).Include(x => x.TripLocations)
+                    .ThenInclude(x => x.Location).Where(x => x.VehicleId == id && x.StartTime != null && x.EndTime == null)
+                    .FirstOrDefaultAsync();
+
+                if (lastTrip == null)
+                {
+                    return new GetLastLocationResponseDTO
+                    {
+                        Message = "Vehicle Location Not Found",
+                        StatusCode = 404,
+                    };
+                }
+
+                if (lastTrip.TripLocations.Count == 0)
+                {
+                    return new GetLastLocationResponseDTO
+                    {
+                        Message = "Vehicle last location",
+                        StatusCode = 200,
+                        LastLocation = new LastLocationObj
+                        {
+                            Address = lastTrip?.EndLocation?.Address ?? "",
+                            Latitude = lastTrip?.EndLocation?.Latitude ?? 0,
+                            Longitude = lastTrip?.EndLocation?.Longitude ?? 0
+                        }
+                    };
+                }
+                else
+                {
+                    var latestTripLocation = lastTrip.TripLocations.LastOrDefault();
+
+                    return new GetLastLocationResponseDTO
+                    {
+                        Message = "Vehicle last location",
+                        StatusCode = 200,
+                        LastLocation = new LastLocationObj
+                        {
+                            Address = latestTripLocation?.Location?.Address ?? "",
+                            Latitude = latestTripLocation?.Location?.Latitude ?? 0,
+                            Longitude = latestTripLocation?.Location?.Longitude ?? 0
+                        }
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new GetLastLocationResponseDTO 
+                {
+                    Message = ex.Message,
+                    StatusCode = 500 
+                };
+            }
+        }
+
         public async Task<GetSingleVehicleResponseDTO> GetSingleVehicle(Guid id)
         {
             try
