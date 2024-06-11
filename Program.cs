@@ -3,6 +3,7 @@ using fleet_management_backend.Repositories.Auth;
 using fleet_management_backend.Repositories.Drivers;
 using fleet_management_backend.Repositories.File;
 using fleet_management_backend.Repositories.Fuels;
+using fleet_management_backend.Repositories.Maintenances;
 using fleet_management_backend.Repositories.Trips;
 using fleet_management_backend.Repositories.Vehicles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -38,6 +39,7 @@ builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IDriverRepository, DriverRepository>();
 builder.Services.AddScoped<ITripRepository, TripRepository>();
 builder.Services.AddScoped<IFuelRepository, FuelRepository>();
+builder.Services.AddScoped<IMaintenanceRepository, MaintenanceRepository>();
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 
