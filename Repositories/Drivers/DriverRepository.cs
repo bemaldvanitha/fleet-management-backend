@@ -201,6 +201,40 @@ namespace fleet_management_backend.Repositories.Drivers
             }
         }
 
+        public async Task<FetchDriverIdResponseDTO> FetchDriverIdToUserId(Guid id)
+        {
+            try
+            {
+                var driver = await _context.Drivers.FirstOrDefaultAsync(x => x.UserId == id);
+
+                if(driver == null)
+                {
+                    return new FetchDriverIdResponseDTO
+                    {
+                        Message = "Driver not found",
+                        StatusCode = 404
+                    };
+                }
+
+                return new FetchDriverIdResponseDTO
+                {
+                    Message = "Driver fetched",
+                    DriverId = driver.Id,
+                    StatusCode = 200
+                };
+
+            }catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return new FetchDriverIdResponseDTO
+                {
+                    Message = ex.Message,
+                    StatusCode = 500
+                };
+            }
+        }
+
         public async Task<GetAllDriversResponseDTO> GetAllDrivers()
         {
             try

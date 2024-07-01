@@ -34,7 +34,8 @@ namespace fleet_management_backend.Repositories.Auth
                     {
                         Message = "Authentication Error",
                         StatusCode = 401,
-                        Token = ""
+                        Token = "",
+                        UserType = ""
                     };
                 }
 
@@ -47,7 +48,8 @@ namespace fleet_management_backend.Repositories.Auth
                     {
                         Message = "Authentication Error",
                         StatusCode = 401,
-                        Token = ""
+                        Token = "",
+                        UserType = ""
                     };
                 }
 
@@ -57,7 +59,8 @@ namespace fleet_management_backend.Repositories.Auth
                 {
                     Message = "Login Success",
                     StatusCode = 200,
-                    Token = token
+                    Token = token,
+                    UserType = isAccountExist.UserType.Type
                 };
 
             }
@@ -69,7 +72,8 @@ namespace fleet_management_backend.Repositories.Auth
                 {
                     Message = ex.Message,
                     StatusCode = 500,
-                    Token = ""
+                    Token = "",
+                    UserType = ""
                 };
             }
         }
@@ -126,7 +130,7 @@ namespace fleet_management_backend.Repositories.Auth
                     {
                         Message = "Email Already Exist",
                         StatusCode = 400,
-                        Token = ""
+                        Token = "",
                     };
                 }
 
@@ -175,7 +179,8 @@ namespace fleet_management_backend.Repositories.Auth
                 {
                     Message = "Sign up successfully",
                     StatusCode = 201,
-                    Token = token
+                    Token = token,
+                    Id = user.Id
                 };
             }
             catch (Exception ex)

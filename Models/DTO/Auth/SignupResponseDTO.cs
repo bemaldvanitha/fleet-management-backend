@@ -7,5 +7,7 @@
         public int StatusCode { get; set; }
 
         public string Message { get; set; }
+
+        public Guid? Id { get; set; }
     }
 }

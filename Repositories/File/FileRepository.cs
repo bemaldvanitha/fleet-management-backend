@@ -29,6 +29,7 @@ namespace fleet_management_backend.Repositories.File
                 {
                     BucketName = bucketName,
                     Key = presignedUrlRequest.Destination + "/" + objectKey,
+                    Protocol = Protocol.HTTPS,
                     Verb = HttpVerb.PUT,
                     Expires = expiration,
                 };

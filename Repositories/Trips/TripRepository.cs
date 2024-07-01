@@ -368,7 +368,8 @@ namespace fleet_management_backend.Repositories.Trips
                 var trip = await _context.Trip.Include(x => x.TripCertifications).ThenInclude(x => x.TripCertificationType)
                     .Include(x => x.Vehicle).ThenInclude(x => x.VehicleBrand).Include(x => x.Vehicle).ThenInclude(x => x.VehicleModel)
                     .Include(x => x.Driver).Include(x => x.TripLocations).ThenInclude(x => x.Location).Include(x => x.TripStops)
-                    .ThenInclude(x => x.StopLocation).FirstOrDefaultAsync(x => x.Id == Id);
+                    .ThenInclude(x => x.StopLocation).Include(x => x.StartLocation).Include(x => x.EndLocation)
+                    .FirstOrDefaultAsync(x => x.Id == Id);
 
                 if (trip == null)
                 {
@@ -440,20 +441,38 @@ namespace fleet_management_backend.Repositories.Trips
                     tripStopList.Add(stop);
                 }
 
+                var tripStartLocation = new TripLocationObject
+                {
+                    Id = trip.StartLocation.Id,
+                    Address = trip.StartLocation?.Address ?? "",
+                    Latitude = trip.StartLocation?.Latitude ?? 0,
+                    Longitude = trip.StartLocation?.Longitude ?? 0,
+                };
+
+                var tripEndLocation = new TripLocationObject
+                {
+                    Id = trip.EndLocation.Id,
+                    Address = trip.EndLocation?.Address ?? "",
+                    Latitude = trip.EndLocation?.Latitude ?? 0,
+                    Longitude = trip.EndLocation?.Longitude ?? 0,
+                };
+
                 var tripFinalObject = new SingleTripObject
                 {
                     Id = trip.Id,
                     DriverId = trip.DriverId,
                     DriverLicenceNumber = trip.Driver.LicenceNumber,
                     DriverName = trip.Driver.FirstName + " " + trip.Driver.LastName,
-                    StartTime = trip?.StartTime ?? DateTime.Now,
-                    EndTime = trip?.EndTime ?? DateTime.Now,
+                    StartTime = trip.StartTime,
+                    EndTime = trip.EndTime,
                     TripCertifications = tripCertificationList,
                     TripLocations = tripLocationList,
                     TripStops = tripStopList,
                     VehicleDetail = trip.Vehicle.VehicleBrand.Brand + " / " + trip.Vehicle.VehicleModel.Model,
                     VehicleId = trip.VehicleId,
-                    VehicleVIN = trip.Vehicle.VIN
+                    VehicleVIN = trip.Vehicle.VIN,
+                    StartLocation = tripStartLocation,
+                    EndLocation = tripEndLocation
                 };
 
                 return new SingleTripResponseDTO

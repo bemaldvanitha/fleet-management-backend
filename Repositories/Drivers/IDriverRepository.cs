@@ -17,5 +17,7 @@ namespace fleet_management_backend.Repositories.Drivers
         public Task<DriverResponseDTO> DeleteDriver(Guid id);
 
         public Task<DriverResponseDTO> UpdateDriver(UpdateDriverRequestDTO updateDriverRequest, Guid Id);
+
+        public Task<FetchDriverIdResponseDTO> FetchDriverIdToUserId(Guid id);
     }
 }

@@ -188,5 +188,31 @@ namespace fleet_management_backend.Controllers
                 return BadRequest("Something went wrong");
             }
         }
+
+        [HttpGet]
+        [Authorize]
+        [Route("User/{user_id}")]
+        public async Task<IActionResult> FetchDriverIdToUserId([FromRoute] string user_id)
+        {
+            try
+            {
+                var driverResponse = await _driverRepository.FetchDriverIdToUserId(Guid.Parse(user_id));
+
+                if(driverResponse.StatusCode == 500)
+                {
+                    return BadRequest(driverResponse);
+                }
+
+                if(driverResponse.StatusCode == 404)
+                {
+                    return NotFound(driverResponse);
+                }
+
+                return Ok(driverResponse);
+            }catch(Exception ex)
+            {
+                return BadRequest("Something went wrong");
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ using fleet_management_backend.Repositories.File;
 using fleet_management_backend.Repositories.Fuels;
 using fleet_management_backend.Repositories.Maintenances;
 using fleet_management_backend.Repositories.Trips;
+using fleet_management_backend.Repositories.Users;
 using fleet_management_backend.Repositories.Vehicles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -22,12 +23,6 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", 
-        builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-});
 
 var awsOptions = builder.Configuration.GetAWSOptions();
 awsOptions.Region = Amazon.RegionEndpoint.APSouth1;
@@ -47,6 +42,7 @@ builder.Services.AddScoped<IDriverRepository, DriverRepository>();
 builder.Services.AddScoped<ITripRepository, TripRepository>();
 builder.Services.AddScoped<IFuelRepository, FuelRepository>();
 builder.Services.AddScoped<IMaintenanceRepository, MaintenanceRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
 
@@ -97,6 +93,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
+app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

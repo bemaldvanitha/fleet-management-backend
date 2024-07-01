@@ -13,9 +13,9 @@
     {
         public Guid Id { get; set; }
 
-        public DateTime StartTime { get; set; }
+        public DateTime? StartTime { get; set; }
 
-        public DateTime EndTime { get; set; }
+        public DateTime? EndTime { get; set; }
 
         public string VehicleVIN { get; set; }
 
@@ -28,6 +28,10 @@
         public string DriverLicenceNumber { get; set; }
 
         public Guid DriverId { get; set; }
+
+        public TripLocationObject StartLocation { get; set; }
+
+        public TripLocationObject EndLocation { get; set; }
 
         public List<TripLocationObj> TripLocations { get; set; }
 
