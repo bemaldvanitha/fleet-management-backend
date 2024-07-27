@@ -1,3 +1,4 @@
+using DotNetEnv;
 using fleet_management_backend.Data;
 using fleet_management_backend.Repositories.Auth;
 using fleet_management_backend.Repositories.Drivers;
@@ -19,21 +20,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+Env.Load();
+builder.Configuration.AddEnvironmentVariables();
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var awsOptions = builder.Configuration.GetAWSOptions();
-awsOptions.Region = Amazon.RegionEndpoint.APSouth1;
+awsOptions.Region = Amazon.RegionEndpoint.GetBySystemName(Environment.GetEnvironmentVariable("AWS_REGION"));
 
 builder.Services.AddDefaultAWSOptions(awsOptions);
 
 builder.Services.AddAWSService<Amazon.S3.IAmazonS3>();
 
 builder.Services.AddDbContext<FleetManagerDbContext>(option =>
-    option.UseMySql(builder.Configuration.GetConnectionString("FleetManagerConnection"), 
-    ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("FleetManagerConnection"))));
+    option.UseMySql(Environment.GetEnvironmentVariable("FLEETMANAGER_CONNECTION"),
+    ServerVersion.AutoDetect(Environment.GetEnvironmentVariable("FLEETMANAGER_CONNECTION"))));
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IFileRepository, FileRepository>();
@@ -44,7 +48,7 @@ builder.Services.AddScoped<IFuelRepository, FuelRepository>();
 builder.Services.AddScoped<IMaintenanceRepository, MaintenanceRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY"));
 
 builder.Services.AddAuthentication(options =>
 {
@@ -58,8 +62,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER"),
+        ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE"),
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 

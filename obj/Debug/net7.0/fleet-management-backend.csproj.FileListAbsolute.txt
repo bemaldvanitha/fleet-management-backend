@@ -52,3 +52,6 @@ D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Microsoft.
 D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\AWSSDK.Core.dll
 D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\AWSSDK.Extensions.NETCore.Setup.dll
 D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\AWSSDK.S3.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\dotenv.net.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\DotNetEnv.dll
+D:\fleet-management\backend\fleet-management-backend\bin\Debug\net7.0\Sprache.dll

@@ -1,0 +1,52 @@
+# .NET Core
+*.dll
+*.exe
+*.pdb
+*.db
+*.bak
+*.sql
+*.log
+
+# ASP.NET Core
+wwwroot/
+*.user
+*.suo
+*.userosscache
+*.suo
+*.cache
+*.csproj.user
+*.csproj.nuget.g.props
+*.csproj.nuget.g.targets
+*.nupkg
+*.snk
+*.swp
+
+# Logs
+logs/
+logfile.log
+
+# Build results
+bin/
+obj/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Environment-specific files
+.env
+*.env
+.env.local
+
+# NPM
+node_modules/
+
+# Yarn
+.yarn/
+.pnp.*
